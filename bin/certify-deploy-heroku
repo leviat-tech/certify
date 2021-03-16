@@ -1,0 +1,63 @@
+#! /bin/sh
+
+set -euo pipefail
+
+if [[ "$1" == "-n" ]]; then
+    heroku=dry_run
+    shift
+else
+    heroku=heroku
+fi
+
+app="$1"
+lineage="$2"
+cert="$lineage/fullchain.pem"
+key="$lineage/privkey.pem"
+domains="$3"
+
+function dry_run() {
+    echo "heroku $*"
+}
+
+
+function app_exists() {
+    $heroku info "$1"
+}
+
+function create_app() {
+    echo "Creating application $1"
+    $heroku create --team crh "$1"
+}
+
+function add_cert() {
+    $heroku certs:add -a "$1" "$2" "$3"
+}
+
+function update_domains() {
+    for d in $2; do
+	echo "Adding domain: $d"
+	$heroku domains:add -a "$1" "$d" || true
+    done
+}
+
+function update_cert() {
+    $heroku certs:update -a "$1" --confirm "$1" "$2" "$3"
+}
+
+function list_domains() {
+    $heroku domains --app "$1" | grep CNAME
+}
+
+echo
+echo "Running Heroku deployment hook"
+echo "App: $app"
+echo "Cert lineage: $lineage"
+echo "Domains: $domains"
+echo
+
+app_exists "$app" || create_app "$app"
+
+update_cert "$app" "$cert" "$key" || add_cert "$app" "$cert" "$key"
+IFS=, update_domains "$app" "$domains"
+
+list_domains "$app"

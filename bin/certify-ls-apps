@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+#  Execute jq with --exit-status --raw-output --from-file \
+exec jq -erf "$0" --arg cert "$1" "${@:2}" "${CERTIFY_CONFIG:-/etc/letsencrypt/certify.json}"
+
+# Will error if there are no apps, but will not error if no domains and no defaultDomains
+(.certs[] | select(.name == $cert) | .domains ) as $defaultDomains | 
+  .apps[] | select(.cert == $cert) |
+  [.app, .deploy, (.domains // $defaultDomains | join(","))] | @tsv

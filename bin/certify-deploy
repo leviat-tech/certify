@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+lineage="$RENEWED_LINEAGE"
+cert_name=$(basename $lineage)
+cert="$lineage/fullchain.pem"
+key="$lineage/privkey.pem"
+
+CERTIFY_STDOUT=${CERTIFY_STDOUT:-/dev/stdout}
+CERTIFY_STDERR=${CERTIFY_STDERR:-/dev/stderr}
+
+function info(){
+    echo "$1" > "$CERTIFY_STDOUT"
+}
+
+info "Running deploy hooks for certificate $cert_name"
+
+certify-ls-apps "$cert_name" |
+    while IFS=$'\t' read -r app deploy_script domains; do
+	"$deploy_script" "$app" "$lineage" "$domains" > "$CERTIFY_STDOUT" 2> "$CERTIFY_STDERR"
+    done
+
+info "Finished running deploy hooks for certificate $cert_name"

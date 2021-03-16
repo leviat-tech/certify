@@ -1,0 +1,25 @@
+#!/bin/bash
+
+pid="$$"
+
+export CERTIFY_STDOUT="/proc/${pid}/fd/1"
+export CERTIFY_STDERR="/proc/${pid}/fd/2"
+
+# Print out information on startup
+certbot  --version
+certbot certificates
+
+# Create any certificates that do not yet exist
+certify
+
+# Set up and launch cron
+# We explicitly start crond with tini because dcron cannot run as PID 1
+# See https://github.com/dubiousjim/dcron/issues/13
+# Note dcron always logs to stdout when in foreground
+CRON_VERBOSITY=${CRON_VERBOSITY:-info}
+CRON_SCHEDULE=${CRON_SCHEDULE:-0 2 * * *}
+pid="$$"
+
+echo "${CRON_SCHEDULE} certify > ${CERTIFY_STDOUT} 2> ${CERTIFY_STDERR}" |
+    crontab - &&
+    exec /sbin/tini -v -- crond -f -l "${CRON_VERBOSITY}"

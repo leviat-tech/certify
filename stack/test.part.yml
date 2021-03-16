@@ -1,0 +1,14 @@
+version: '3'
+
+# This is a partial override file
+
+services:
+  certbot:
+    volumes:
+      - ../test/work:/var/lib/letsencrypt
+      - ../test/conf:/etc/letsencrypt
+      - ../test/logs:/var/log/letsencrypt
+      - ../test/stamps:/var/spool/cron/cronstamps
+    environment:
+      - CRON_SCHEDULE=${CERTBOT_CRON_SCHEDULE:-*/4 * * * *}
+      - CERTBOT_EXTRA_ARGS=--test-cert --debug --force-renewal --break-my-certs

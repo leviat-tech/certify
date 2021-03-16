@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+CERTBOT=${CERTBOT:-certbot}
+CERTBOT_COMMON_ARGS=(-n --agree-tos --email studio@crh.io --dns-route53)
+CERTBOT_EXTRA_ARGS=${CERTBOT_EXTRA_ARGS:-}
+
+export CERTIFY_STDOUT=${CERTIFY_STDOUT:-/dev/stdout}
+export CERTIFY_STDERR=${CERTIFY_STDERR:-/dev/stderr}
+
+CERTBOT_CONFIG_DIR=${CERTBOT_CONFIG_DIR:-/etc/letsencrypt}
+CONFIG_FILE="${CERTBOT_CONFIG_DIR}/config.json"
+
+
+certify-ls-certs |
+    while IFS=$'\t' read -r cert domains; do
+	read -a extra_args <<< "$CERTBOT_EXTRA_ARGS"
+
+	$CERTBOT certonly "${CERTBOT_COMMON_ARGS[@]}" "${extra_args[@]}" \
+		 --cert-name "$cert" --deploy-hook "certify-deploy" -d "$domains" "$@" \
+		 > "$CERTIFY_STDOUT" 2> "$CERTIFY_STDERR"
+    done

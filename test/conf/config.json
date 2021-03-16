@@ -1,0 +1,35 @@
+{
+    "certs": [{
+            "name": "lorem-ipsum",
+            "domains": [
+                "*.lorem.crh.nyc",
+                "lorem.crh.nyc",
+                "ipsum.crh.nyc"
+            ]
+        },
+        {
+            "name": "dolor",
+            "domains": [
+                "dolor.crh.nyc"
+            ]
+        }
+    ],
+    "apps": [{
+            "app": "cert-deploy-test-ipsum",
+            "domains": [
+                "ipsum.crh.nyc"
+            ],
+            "cert": "lorem-ipsum",
+            "deploy": "certify-deploy-heroku"
+        },
+        {
+            "app": "cert-deploy-test-lorem",
+            "domains": [
+                "*.lorem.crh.nyc",
+                "lorem.crh.nyc"
+            ],
+            "cert": "lorem-ipsum",
+            "deploy": "certify-deploy-heroku"
+        }
+    ]
+}

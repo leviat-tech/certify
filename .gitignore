@@ -1,0 +1,10 @@
+*~
+\#*\#
+.\#*
+work
+logs
+conf/csr
+conf/keys
+.envrc
+.env
+*.sentinel

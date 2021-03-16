@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  certbot:
+    build:
+      context: ..
+      dockerfile: stack/certbot/Dockerfile
+    volumes:
+      - ../work:/var/lib/letsencrypt
+      - ../conf:/etc/letsencrypt
+      - ../logs:/var/log/letsencrypt
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - HEROKU_API_KEY=${HEROKU_API_KEY}
+      - CERTBOT_EXTRA_ARGS=${CERTBOT_EXTRA_ARGS:---dry-run}
+      - CERTIFY_CONFIG=${CERTIFY_CONFIG:-/etc/letsencrypt/certify.json}
+    # - LOGFILE=/var/log/letsencrypt/certrenewal.log
+      - CRON_SCHEDULE=${CERTBOT_CRON_SCHEDULE:-0 2 * * *}
+    # - EMAIL=user@my.domain.com      
+    restart: always

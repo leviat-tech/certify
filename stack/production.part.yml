@@ -1,0 +1,8 @@
+version: '3'
+
+# This is a partial override file
+
+services:
+  certbot:
+    environment:
+      - CERTBOT_EXTRA_ARGS=${CERTBOT_EXRA_ARGS:-}
